@@ -7,6 +7,11 @@ import hmac, base64, hashlib, binascii, os
 import shopify
 import requests
 import logging
+from django.db import models
+
+class UserData(models.Model):
+    email = models.CharField(max_length=100)
+    access_token = models.CharField(max_length=100)
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -76,8 +81,12 @@ def finalize(request):
             "shop_url": shop_url,
             "access_token": session.request_token(request.GET)
         }
+     
+     #Storing user's email and access token in the database
+        user_email = request.GET.get('email', 'unknown')
+        UserPII.objects.create(email=user_email, access_token=access_token)
 
-        # New code to inject PII problem
+
         if 'user_age' in request.session:
             user_age = request.session['user_age']
             logger.info(f"User's age: {user_age}")
